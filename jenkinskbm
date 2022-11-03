@@ -7,7 +7,7 @@ echo "Job name: ${env.JOB_NAME}"
 echo "Bulid no: ${env.BUILD_NUMBER}"
 echo "Node name: ${env. NODE_NAME}"
 try{
-sendslacknotifications("STARTED")
+Sendslacknotifications("STARTED")
 stage ('checkoutcode')
 {
 git branch: 'development', credentialsId: '073ab41c-a1a1-4445-a9fa-901dfa559ab1', url: 'https://github.com/kbmdevops/maven-web-application.git'
