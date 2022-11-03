@@ -36,10 +36,9 @@ currentBuild.result = "FAILURE"
 finally{
 Sendslacknotification(currentBuild.result)
 }//finallay block closeing
-
 }//Node closeing
 
-def notifyBuild(String buildStatus = 'STARTED') {
+def Sendslacknotifications(String buildStatus = 'STARTED') {
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
 
