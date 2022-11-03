@@ -16,7 +16,7 @@ stage ('bulid')
 {
 sh "${mavenHome}/bin/mvn clean package"
 }
-stage ('Excute sonarReport'){
+/*stage ('Excute sonarReport'){
 sh "${mavenHome}/bin/mvn clean sonar:sonar"
 }
 stage ('uploadarticattonexus'){
@@ -27,7 +27,7 @@ sshagent(['ae245a06-19a9-4924-b233-233531239606']) {
 sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.15.251:/opt/apache-tomcat-9.0.68/webapps/"
 }
 }
-
+*/
 }//try closeing
 
 catch(e){
