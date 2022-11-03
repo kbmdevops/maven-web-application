@@ -33,7 +33,7 @@ catch(e){
 currentBuild.result = "FAILURE"
 }//catch block closeing
 finally{
-Sendslacknotifications(currentBuild.result)
+sendslacknotifications(currentBuild.result)
 }//finallay block closeing
 }//Node closeing
 
