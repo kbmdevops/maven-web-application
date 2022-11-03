@@ -9,6 +9,7 @@ maven "maven3.8.5"
 stages{
 stage('checkoutcode'){
 steps{
+sendslacknotifications("STARTED")
 git branch: 'development', credentialsId: '073ab41c-a1a1-4445-a9fa-901dfa559ab1', url: 'https://github.com/kbmdevops/maven-web-application.git'
 }//step closeing
 }//stage closeing
@@ -40,5 +41,18 @@ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@17
 }//stage closeing
 
 }//stages closeing
+
+post{
+aborted{
+sendslacknotifications(currentBuild.result)
+}
+success{
+sendslacknotifications(currentBuild.result)
+}
+failure{
+sendslacknotifications(currentBuild.result)
+}
+}
+
 
 }//pipeline closeing
