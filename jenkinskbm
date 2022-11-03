@@ -1,0 +1,32 @@
+node{
+
+def mavenHome = tool name: "maven3.8.5"
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+
+echo "Job name: ${env.JOB_NAME}"
+echo "Bulid no: ${env.BUILD_NUMBER}"
+echo "Node name: ${env. NODE_NAME}"
+
+stage ('checkoutcode')
+{
+git branch: 'development', credentialsId: '073ab41c-a1a1-4445-a9fa-901dfa559ab1', url: 'https://github.com/kbmdevops/maven-web-application.git'
+}
+stage ('bulid')
+{
+sh "${mavenHome}/bin/mvn clean package"
+}
+stage ('Excute sonarReport'){
+sh "${mavenHome}/bin/mvn clean sonar:sonar"
+}
+stage ('uploadarticattonexus'){
+sh "${mavenHome}/bin/mvn deploy"
+}
+stage ('deployaplication to tomcat'){
+sshagent(['ae245a06-19a9-4924-b233-233531239606']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.15.251:/opt/apache-tomcat-9.0.68/webapps/"
+}
+}
+
+}//Node closeing
+
+  
