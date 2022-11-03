@@ -1,0 +1,44 @@
+pipeline{
+
+agent any
+
+tools{
+maven "maven3.8.5"
+}
+
+stages{
+stage('checkoutcode'){
+steps{
+git branch: 'development', credentialsId: '073ab41c-a1a1-4445-a9fa-901dfa559ab1', url: 'https://github.com/kbmdevops/maven-web-application.git'
+}//step closeing
+}//stage closeing
+
+stage('Build'){
+steps{
+sh "mvn clean package"
+}//steps closeing
+}//stage closeing
+
+stage('Execute SonarQube Report'){
+steps{
+sh "mvn clean sonar:sonar"
+}//step closeing
+}//stage closeing
+
+stage('UploadArtifactIntoNexus'){
+steps{
+sh "mvn clean deploy"
+}//step closeing
+}//stage closeing
+
+stage('DeployAppIntoTomcat'){
+steps{
+sshagent(['ae245a06-19a9-4924-b233-233531239606']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.15.251:/opt/apache-tomcat-9.0.68/webapps/"
+}
+}//steps closeing
+}//stage closeing
+
+}//stages closeing
+
+}//pipeline closeing
