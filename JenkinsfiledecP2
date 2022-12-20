@@ -1,0 +1,83 @@
+pipeline{
+agent any
+tools{
+maven "maven3.8.6"
+}
+options {
+  buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '4')
+  timestamps()
+}
+stages{
+stage('checkoutcode'){
+steps{
+ sendslacknotifications('STARTED')   
+git credentialsId: '410e22b7-450f-461d-9377-6d6c49e96b85', url: 'https://github.com/kbmdevops/maven-web-application.git'
+}
+}
+
+stage('build'){
+steps{
+sh "mvn clean package"
+}
+}
+
+stage('executesonarcubereport'){
+steps{
+sh "mvn clean sonar:sonar"
+}
+}
+
+stage('UploadArtifactToNexus'){
+steps{
+sh "mvn clean deploy"
+}
+}
+
+stage('DeployAplicationTotomcat'){
+steps{
+sshagent(['c9619446-3f3e-4937-8135-35631c944518']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.46:/opt/apache-tomcat-9.0.70/webapps/"
+}
+
+}//steps closeing
+}//stage closeing
+}//stages closeing
+post {
+  aborted {
+    sendslacknotifications(currentBuild.result)
+  }
+  success {
+    sendslacknotifications(currentBuild.result)
+  }
+  failure {
+    sendslacknotifications(currentBuild.result)
+  }
+}
+
+}//pipeline closeing
+
+def sendslacknotifications(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESS'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    colorName = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESS') {
+    colorName = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    colorName = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: summary, channel: "#walmart")
+}
